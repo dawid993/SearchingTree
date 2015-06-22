@@ -1,6 +1,6 @@
 package com.bieniek.bst;
 
-public class Tree
+public class BST implements SearchTree
 {
 	private Node root;
 
@@ -14,15 +14,36 @@ public class Tree
 		this.root = root;
 	}
 	
-	public void insertNode(int keyInsertNode)
+	@Override
+	public void insert(int keyInsertNode)
 	{		
-		if(root == null)
-			root = createNode(keyInsertNode, null);
-		else
-			recursivelyInsert(root,keyInsertNode);
+		iterationInsert(keyInsertNode);
 	}
 	
-	public Node findNode(Node element,int key)
+	@Override
+	public Node find(int key)
+	{
+		return findNode(root,key);
+	}
+	
+	@Override
+	public void delete(int key)
+	{
+		Node element = findNode(root,key);
+		deleteNode(element);
+	}
+	
+	public void inorder(Node v)
+	{
+		  if(v != null)
+		  {
+		    inorder(v.getLeft());      
+		    System.out.println(v.getKey());
+		    inorder(v.getRight());     
+		  }
+	}	
+	
+	private Node findNode(Node element,int key)
 	{
 		if(element == null)
 			return null;
@@ -35,7 +56,7 @@ public class Tree
 			return element;
 	}
 	
-	public Node findSuccesor(Node elem)
+	private Node findSuccesor(Node elem)
 	{
 		if(elem == null)
 			return null;
@@ -63,18 +84,18 @@ public class Tree
 		}		
 	}
 	
-	public void deleteNode(Node elem)
+	private void deleteNode(Node elementToDelete)
 	{
-		if(elem == null) 
+		if(elementToDelete == null) 
 			return;
 		
 		Node deleteElementStrategy;
 		Node sonOfElement;
 		
-		if(elem.getLeft() == null || elem.getRight() == null)
-			deleteElementStrategy = elem;
+		if(elementToDelete.getLeft() == null || elementToDelete.getRight() == null)
+			deleteElementStrategy = elementToDelete;
 		else
-			deleteElementStrategy = findSuccesor(elem);
+			deleteElementStrategy = findSuccesor(elementToDelete);
 		
 		if(deleteElementStrategy.getLeft() != null)
 			sonOfElement = deleteElementStrategy.getLeft();
@@ -94,43 +115,16 @@ public class Tree
 				deleteElementStrategy.getParent().setRight(sonOfElement);
 		}
 		
-		if(deleteElementStrategy != elem)
-			elem.setKey(deleteElementStrategy.getKey());
-	}
-	public void inorder(Node v)
-	{
-		  if(v != null)
-		  {
-		    inorder(v.getLeft());      
-		    System.out.println(v.getKey());
-		    inorder(v.getRight());     
-		  }
+		if(deleteElementStrategy != elementToDelete)
+			elementToDelete.setKey(deleteElementStrategy.getKey());
 	}
 	
 	private Node createNode(int key,Node parent)
 	{
 		return new Node(parent,key);		
-	}
+	}	
 	
-	private void recursivelyInsert(Node beforeNode,int insertNodeKey)
-	{
-		if(beforeNode.getKey() < insertNodeKey)
-		{
-			if(beforeNode.getRight() != null)
-				recursivelyInsert(beforeNode.getRight(), insertNodeKey);
-			else
-				beforeNode.setRight(createNode(insertNodeKey, beforeNode));
-		}
-		else
-		{
-			if(beforeNode.getLeft() != null)
-				recursivelyInsert(beforeNode.getLeft(), insertNodeKey);
-			else
-				beforeNode.setLeft(createNode(insertNodeKey, beforeNode));
-		}
-	}
-	
-	public void iterationInsert(int insertNodeKey)
+	private void iterationInsert(int insertNodeKey)
 	{
 		Node element = root;
 		Node beforeElement = null;
@@ -140,8 +134,9 @@ public class Tree
 			beforeElement = element;
 			if(element.getKey() < insertNodeKey)
 				element = element.getRight();
-			else 
+			else if(element.getKey()> insertNodeKey)
 				element = element.getLeft();
+			else return;
 		}
 		
 		if(beforeElement == null)
@@ -150,8 +145,10 @@ public class Tree
 		{
 			if(beforeElement.getKey() < insertNodeKey)
 				beforeElement.setRight(createNode(insertNodeKey,beforeElement));
-			else
+			else if(beforeElement.getKey() > insertNodeKey)
 				beforeElement.setLeft(createNode(insertNodeKey,beforeElement));
+			else
+				return;
 				
 		}
 	}
